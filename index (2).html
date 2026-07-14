@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registration Form</title>
+<style>
+  :root {
+    --purple: #673ab7;
+    --purple-dark: #5c2d91;
+    --border: #dadce0;
+    --text: #202124;
+    --muted: #5f6368;
+    --error: #d93025;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Google Sans', Roboto, Arial, sans-serif;
+    background: #f0ebf8;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 12px 60px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+
+  .header-card {
+    background: var(--purple);
+    border-radius: 8px 8px 0 0;
+    padding: 24px 24px 20px;
+    border-top: 10px solid var(--purple-dark);
+  }
+  .header-card h1 {
+    color: #fff;
+    font-size: 28px;
+    font-weight: 400;
+    margin: 0 0 6px;
+  }
+  .header-card p {
+    color: #eee;
+    font-size: 14px;
+    margin: 0;
+  }
+
+  form {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 8px 24px 24px;
+  }
+
+  .field {
+    padding: 20px 0;
+    border-bottom: 1px solid #f1f1f1;
+  }
+  .field label {
+    display: block;
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+  .required { color: var(--error); margin-left: 2px; }
+
+  .field input {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px 4px;
+    font-size: 15px;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    outline: none;
+    background: transparent;
+  }
+  .field input:focus {
+    border-bottom: 2px solid var(--purple);
+  }
+  .field .hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .field .error-msg {
+    font-size: 12px;
+    color: var(--error);
+    margin-top: 6px;
+    display: none;
+  }
+  .field.invalid input { border-bottom: 2px solid var(--error); }
+  .field.invalid .error-msg { display: block; }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 24px;
+  }
+  button {
+    background: var(--purple);
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  button:hover { background: var(--purple-dark); }
+  button:disabled { background: #c7b8e0; cursor: not-allowed; }
+
+  #status {
+    max-width: 640px;
+    margin: 16px auto 0;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: none;
+  }
+  #status.success { display: block; background: #e6f4ea; color: #137333; border: 1px solid #137333; }
+  #status.error { display: block; background: #fce8e6; color: var(--error); border: 1px solid var(--error); }
+
+  .footer-note { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header-card">
+      <h1>Registration Form</h1>
+      <p>Please fill out the details below.</p>
+    </div>
+
+    <form id="regForm" novalidate>
+      <div class="field" data-field="full_name">
+        <label>Full Name<span class="required">*</span></label>
+        <input type="text" name="full_name" placeholder="Your answer">
+        <div class="error-msg">This field is required</div>
+      </div>
+
+      <div class="field" data-field="email">
+        <label>Email<span class="required">*</span></label>
+        <input type="email" name="email" placeholder="Your answer">
+        <div class="error-msg">Please enter a valid email address</div>
+      </div>
+
+      <div class="field" data-field="age">
+        <label>Age</label>
+        <input type="number" name="age" min="0" placeholder="Your answer">
+        <div class="hint">Optional</div>
+        <div class="error-msg">Please enter a valid age</div>
+      </div>
+
+      <div class="field" data-field="phone">
+        <label>Phone Number<span class="required">*</span></label>
+        <input type="tel" name="phone" placeholder="Your answer">
+        <div class="error-msg">This field is required</div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" id="submitBtn">Submit</button>
+      </div>
+    </form>
+
+    <div id="status"></div>
+    <div class="footer-note">Never submit passwords through this form.</div>
+  </div>
+
+<script>
+const form = document.getElementById('regForm');
+const status = document.getElementById('status');
+const submitBtn = document.getElementById('submitBtn');
+
+function setInvalid(fieldName, invalid) {
+  const el = form.querySelector(`[data-field="${fieldName}"]`);
+  el.classList.toggle('invalid', invalid);
+}
+
+function validate(data) {
+  let valid = true;
+
+  if (!data.full_name.trim()) { setInvalid('full_name', true); valid = false; }
+  else setInvalid('full_name', false);
+
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim());
+  if (!emailOk) { setInvalid('email', true); valid = false; }
+  else setInvalid('email', false);
+
+  if (data.age !== '' && (isNaN(data.age) || Number(data.age) < 0)) {
+    setInvalid('age', true); valid = false;
+  } else setInvalid('age', false);
+
+  if (!data.phone.trim()) { setInvalid('phone', true); valid = false; }
+  else setInvalid('phone', false);
+
+  return valid;
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  status.className = '';
+  status.style.display = 'none';
+
+  const formData = new FormData(form);
+  const data = {
+    full_name: formData.get('full_name') || '',
+    email: formData.get('email') || '',
+    age: formData.get('age') || '',
+    phone: formData.get('phone') || ''
+  };
+
+  if (!validate(data)) return;
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+
+  try {
+    const res = await fetch('/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        full_name: data.full_name.trim(),
+        email: data.email.trim(),
+        age: data.age === '' ? null : Number(data.age),
+        phone: data.phone.trim()
+      })
+    });
+
+    if (!res.ok) throw new Error('Server error');
+
+    status.textContent = 'Your response has been recorded.';
+    status.className = 'success';
+    form.reset();
+  } catch (err) {
+    status.textContent = 'Something went wrong. Please try again.';
+    status.className = 'error';
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit';
+  }
+});
+</script>
+</body>
+</html>
